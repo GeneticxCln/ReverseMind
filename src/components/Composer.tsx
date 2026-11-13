@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
-  ChevronDown,
   FolderGit2,
   Mic,
   MicOff,
@@ -13,6 +12,7 @@ import {
 import { useStore } from '../store';
 import type { Agent, ChatThread } from '../types';
 import { IconButton } from './ui';
+import { DropMenu } from './DropMenu';
 
 export interface ComposerProps {
   agent: Agent | null;
@@ -215,24 +215,17 @@ export function Composer({
           <IconButton label="Attach files" onClick={() => fileInput.current?.click()}>
             <Paperclip size={14} />
           </IconButton>
-          <label className="composer-select" title="Workspace">
-            <FolderGit2 size={12} />
-            <select
-              className="bare-select"
-              aria-label="Workspace"
-              value={workspaceId || ''}
-              onChange={(e) => onWorkspaceChange(e.target.value || null)}
-            >
-              <option value="">No workspace</option>
-              {workspaces.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                  {item.kind === 'ssh' ? ' (SSH)' : ''}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={11} />
-          </label>
+          <DropMenu
+            label="Workspace"
+            testId="composer-workspace"
+            icon={<FolderGit2 size={12} />}
+            value={workspaceId || ''}
+            onChange={(value) => onWorkspaceChange(value || null)}
+            options={[
+              { value: '', label: 'No workspace' },
+              ...workspaces.map((item) => ({ value: item.id, label: `${item.name}${item.kind === 'ssh' ? ' (SSH)' : ''}` })),
+            ]}
+          />
           <div className="spacer" />
           <button
             type="button"
@@ -244,20 +237,18 @@ export function Composer({
             <ShieldCheck size={12} />
             {agent?.approval === 'auto' ? 'Auto-approve' : 'Ask first'}
           </button>
-          <label className="composer-select" title="Agent mode">
-            <select
-              className="bare-select"
-              aria-label="Agent mode"
-              value={mode}
-              onChange={(e) => onModeChange(e.target.value as ChatThread['mode'])}
-              data-testid="composer-mode"
-            >
-              <option value="ask">Ask</option>
-              <option value="plan">Plan</option>
-              <option value="agent">Agent</option>
-            </select>
-            <ChevronDown size={11} />
-          </label>
+          <DropMenu
+            label="Agent mode"
+            testId="composer-mode"
+            align="right"
+            value={mode}
+            onChange={(value) => onModeChange(value as ChatThread['mode'])}
+            options={[
+              { value: 'ask', label: 'Ask', hint: 'Read-only: can look, not touch' },
+              { value: 'plan', label: 'Plan', hint: 'Writes a plan, runs nothing' },
+              { value: 'agent', label: 'Agent', hint: 'Can edit files and run commands' },
+            ]}
+          />
           {state.settings.voiceEnabled && (
             <IconButton
               label={listening ? 'Stop dictation' : 'Dictate'}
@@ -281,25 +272,6 @@ export function Composer({
           </button>
         </div>
       </div>
-      {!compact && (
-        <div className="composer-foot">
-          <span>
-            <b>Enter</b> to send · <b>Shift+Enter</b> for a new line
-          </span>
-          {workspace && (
-            <>
-              <span>·</span>
-              <span title={workspace.path}>{workspace.name}</span>
-            </>
-          )}
-          {!workspace && (
-            <>
-              <span>·</span>
-              <span>No workspace selected</span>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

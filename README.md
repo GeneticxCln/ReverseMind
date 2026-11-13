@@ -13,7 +13,21 @@
 - **Tickets, routines, prompt library and usage tracking**, all stored locally.
 - **Hardened**: sandboxed renderer, workspace paths jailed against `..` and symlinks, locked-down browser pane, API keys in the OS keyring when available.
 
-## Quick start
+## Install
+
+Download a package from the [latest release](https://github.com/GeneticxCln/ReverseMind/releases/latest):
+
+| Format | Command |
+| --- | --- |
+| AppImage | `chmod +x ReverseMind-*.AppImage && ./ReverseMind-*.AppImage` |
+| Debian / Ubuntu | `sudo apt install ./ReverseMind-*-amd64.deb` |
+| Fedora / RHEL | `sudo dnf install ./ReverseMind-*.x86_64.rpm` |
+| Arch / CachyOS | `sudo pacman -U ReverseMind-*-x86_64.pkg.tar.xz` |
+| Any distro | `tar xzf ReverseMind-*-x64.tar.gz`, then run `reversemind` inside |
+
+Builds are unsigned and need `python3` on the host for terminals.
+
+## Build from source
 
 Requires Linux, Node 20+, Python 3 (for terminals) and Git.
 
@@ -22,6 +36,7 @@ npm install
 npm run dev          # development
 npm start            # production build
 npm run package      # AppImage in release/
+npm run package:all  # AppImage, deb, rpm, tar.gz, pacman (rpm needs rpmbuild)
 ```
 
 Add a model under **Settings → Model providers**, or use the offline runtime with no setup.

@@ -25,7 +25,8 @@ test('Ask mode is read-only and does not propose writes', async () => {
   const { page, workspacePath } = harness;
   const file = path.join(workspacePath, 'ask-blocked.txt');
   try {
-    await page.locator('[data-testid="composer-mode"]').selectOption('ask');
+    await page.locator('[data-testid="composer-mode"]').click();
+    await page.locator('[data-testid="composer-mode-option-ask"]').click();
     await page.locator('[data-testid="composer-input"]').fill('Create a file named ask-blocked.txt with content nope');
     await page.locator('[data-testid="composer-input"]').press('Enter');
 
@@ -42,7 +43,8 @@ test('Plan mode plans without proposing tools', async () => {
   const { page, workspacePath } = harness;
   const file = path.join(workspacePath, 'plan-blocked.txt');
   try {
-    await page.locator('[data-testid="composer-mode"]').selectOption('plan');
+    await page.locator('[data-testid="composer-mode"]').click();
+    await page.locator('[data-testid="composer-mode-option-plan"]').click();
     await page.locator('[data-testid="composer-input"]').fill('Create a file named plan-blocked.txt with content nope');
     await page.locator('[data-testid="composer-input"]').press('Enter');
 

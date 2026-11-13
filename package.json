@@ -2,7 +2,10 @@
   "name": "reversemind",
   "version": "0.1.0",
   "description": "ReverseMind \u2014 local-first agent super app for Linux",
-  "author": "ReverseMind",
+  "author": {
+    "name": "ReverseMind",
+    "email": "GeneticxCln@users.noreply.github.com"
+  },
   "license": "MIT",
   "main": "dist-electron/main.cjs",
   "private": true,
@@ -18,7 +21,8 @@
     "test:e2e": "npm run build && playwright test",
     "test:e2e:headed": "npm run build && playwright test --headed",
     "test:packaged": "npm run package && RM_PACKAGED=release/linux-unpacked/reversemind playwright test e2e/packaged.spec.ts",
-    "postinstall": "node scripts/ensure-electron.mjs"
+    "postinstall": "node scripts/ensure-electron.mjs",
+    "package:all": "npm run build && electron-builder --linux AppImage deb rpm tar.gz pacman"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
@@ -46,5 +50,10 @@
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true
   },
-  "desktopName": "reversemind.desktop"
+  "desktopName": "reversemind.desktop",
+  "homepage": "https://github.com/GeneticxCln/ReverseMind",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeneticxCln/ReverseMind.git"
+  }
 }

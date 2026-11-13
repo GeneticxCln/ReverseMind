@@ -1,0 +1,78 @@
+name: Release
+
+# Push a tag like v0.1.0 to build every Linux package and publish a GitHub release.
+# "Run workflow" from the Actions tab builds the packages and attaches them as a
+# workflow artifact without publishing anything.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+            exit 1
+          fi
+
+      - name: Packaging tools (rpmbuild, bsdtar, fakeroot)
+        run: sudo apt-get update && sudo apt-get install -y rpm libarchive-tools fakeroot
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+      - name: Build AppImage, deb, rpm, tar.gz and pacman
+        run: npx electron-builder --linux AppImage deb rpm tar.gz pacman --publish never
+
+      - name: Checksums
+        working-directory: release
+        run: sha256sum ReverseMind-* > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            release/ReverseMind-*
+            release/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          ## Install
+
+          | Format | Command |
+          | --- | --- |
+          | AppImage | `chmod +x ReverseMind-*.AppImage && ./ReverseMind-*.AppImage` |
+          | Debian / Ubuntu | `sudo apt install ./ReverseMind-*-amd64.deb` |
+          | Fedora / RHEL | `sudo dnf install ./ReverseMind-*.x86_64.rpm` |
+          | Arch / CachyOS | `sudo pacman -U ReverseMind-*-x86_64.pkg.tar.xz` |
+          | Any distro | `tar xzf ReverseMind-*-x64.tar.gz` then run `ReverseMind-*/reversemind` |
+
+          Needs `python3` on the host for terminals. Builds are unsigned; verify downloads with `SHA256SUMS.txt`.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" release/ReverseMind-* release/SHA256SUMS.txt \
+            --title "ReverseMind ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md \
+            --generate-notes \
+            --verify-tag

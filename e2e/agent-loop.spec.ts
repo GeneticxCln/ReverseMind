@@ -109,7 +109,8 @@ test('Ask mode denies write tools the model tries anyway and tells it why', asyn
   });
   const harness = await launchApp({ settings: providerSettings(provider.url, 'auto') });
   try {
-    await harness.page.locator('[data-testid="composer-mode"]').selectOption('ask');
+    await harness.page.locator('[data-testid="composer-mode"]').click();
+    await harness.page.locator('[data-testid="composer-mode-option-ask"]').click();
     await harness.page.locator('[data-testid="composer-input"]').fill('write x');
     await harness.page.locator('[data-testid="composer-input"]').press('Enter');
     await expect(harness.page.locator('[data-testid="chat-messages"]')).toContainText('Cannot write in Ask mode.', { timeout: 20_000 });

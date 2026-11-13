@@ -21,12 +21,26 @@ linux:
   syncDesktopName: true
   target:
     - AppImage
+    - deb
+    - rpm
+    - tar.gz
+    - pacman
   category: Development
   icon: build/icon.png
-  artifactName: ReverseMind-${version}-${arch}.AppImage
+  maintainer: ReverseMind <GeneticxCln@users.noreply.github.com>
+  vendor: ReverseMind
+  synopsis: Local-first agent workspace with terminals, editor, Git review and MCP
+  artifactName: ${productName}-${version}-${arch}.${ext}
   desktop:
     entry:
       Name: ReverseMind
-      Comment: Local-first agent super app
+      Comment: Local-first agent workspace
       Categories: Development;Utility;
+deb:
+  depends: [libgtk-3-0, libnotify4, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libuuid1, libsecret-1-0, python3]
+rpm:
+  depends: [gtk3, libnotify, nss, libXScrnSaver, libXtst, xdg-utils, at-spi2-core, libuuid, python3]
+pacman:
+  artifactName: ${productName}-${version}-x86_64.pkg.tar.xz
+  depends: [gtk3, libnotify, nss, libxss, libxtst, xdg-utils, at-spi2-core, util-linux-libs, python]
 npmRebuild: false

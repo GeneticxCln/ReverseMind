@@ -1,16 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Plus, Search, Settings2, TerminalSquare, Trash2, X } from 'lucide-react';
+import { BookText, Plus, Search, Settings2, TerminalSquare, Trash2, X } from 'lucide-react';
 import { useStore } from '../store';
 import { ChatPanel } from '../components/ChatPanel';
 import { AgentAvatar, Badge, Button, IconButton } from '../components/ui';
 import { AgentModal } from '../components/Modals';
+import { ChipPopover } from '../components/DropMenu';
 import { ENGINE_META } from '../types';
 import { engineTerminalPane } from '../engines';
 
 export function AgentView() {
   const { state, setState, patchUi, mutateChat, notify, createChat, deleteChat, toast } = useStore();
-  const [openSaved, setOpenSaved] = useState(false);
-  const [openSearch, setOpenSearch] = useState(false);
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(false);
   const ensured = useRef<Set<string>>(new Set());
@@ -119,6 +118,68 @@ export function AgentView() {
             </div>
           </div>
         </div>
+        <div className="chat-top-mid">
+          <ChipPopover label="Saved prompts" icon={<BookText size={12} />} count={state.prompts.length} testId="saved-prompts-toggle">
+            {(close) => (
+              <div className="pop-list">
+                {state.prompts.map((prompt) => (
+                  <button
+                    type="button"
+                    className="prompt-mini"
+                    key={prompt.id}
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('rm:composer-draft', { detail: { text: prompt.body } }));
+                      notify('Prompt inserted', prompt.title, 'info');
+                      close();
+                    }}
+                  >
+                    <b>{prompt.title}</b>
+                    <span>{prompt.body.slice(0, 90)}{prompt.body.length > 90 ? '…' : ''}</span>
+                  </button>
+                ))}
+                {state.prompts.length === 0 && <div className="faint small" style={{ padding: 8 }}>No saved prompts yet. Add one from the Prompts page.</div>}
+              </div>
+            )}
+          </ChipPopover>
+          <ChipPopover label="Search" icon={<Search size={12} />} count={chats.length} testId="search-conversations-toggle">
+            {(close) => (
+              <div className="pop-list">
+                <div className="search-row">
+                  <Search size={12} />
+                  <input
+                    value={query}
+                    autoFocus
+                    placeholder="Search this agent's conversations…"
+                    onChange={(e) => setQuery(e.target.value)}
+                    data-testid="chat-search-input"
+                  />
+                  {query && (
+                    <button type="button" className="icon-button" aria-label="Clear" onClick={() => setQuery('')}>
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+                <div className="chat-search-results">
+                  {filtered.slice(0, 10).map((chat) => (
+                    <button
+                      key={chat.id}
+                      type="button"
+                      className="search-result"
+                      onClick={() => {
+                        patchUi({ selectedChatId: chat.id });
+                        close();
+                      }}
+                    >
+                      <b>{chat.title}</b>
+                      <span>{new Date(chat.updatedAt).toLocaleDateString()}</span>
+                    </button>
+                  ))}
+                  {filtered.length === 0 && <div className="faint small" style={{ padding: 6 }}>No conversations match “{query}”.</div>}
+                </div>
+              </div>
+            )}
+          </ChipPopover>
+        </div>
         <div className="chat-top-actions">
           <Badge tone={running ? 'amber' : 'neutral'} dot>
             {running ? `${running} working` : 'Idle'}
@@ -133,72 +194,6 @@ export function AgentView() {
           </IconButton>
         </div>
       </div>
-
-      <button type="button" className="chat-tool-row" onClick={() => setOpenSaved((v) => !v)} data-testid="saved-prompts-toggle">
-        <ChevronRight size={12} className={openSaved ? 'rot90' : ''} />
-        Saved prompts
-        <span className="spacer" />
-        <span className="faint small">{state.prompts.length}</span>
-      </button>
-      {openSaved && (
-        <div className="chat-tool-panel">
-          {state.prompts.map((prompt) => (
-            <button
-              type="button"
-              className="prompt-mini"
-              key={prompt.id}
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('rm:composer-draft', { detail: { text: prompt.body } }));
-                notify('Prompt inserted', prompt.title, 'info');
-              }}
-            >
-              <b>{prompt.title}</b>
-              <span>{prompt.body.slice(0, 90)}{prompt.body.length > 90 ? '…' : ''}</span>
-            </button>
-          ))}
-          {state.prompts.length === 0 && <div className="faint small">No saved prompts yet. Add one from the Prompts page.</div>}
-        </div>
-      )}
-
-      <button type="button" className="chat-tool-row" onClick={() => setOpenSearch((v) => !v)} data-testid="search-conversations-toggle">
-        <ChevronRight size={12} className={openSearch ? 'rot90' : ''} />
-        Search conversations
-        <span className="spacer" />
-        <span className="faint small">{chats.length}</span>
-      </button>
-      {openSearch && (
-        <div className="chat-tool-panel">
-          <div className="search-row">
-            <Search size={12} />
-            <input
-              value={query}
-              autoFocus
-              placeholder="Search this agent's conversations…"
-              onChange={(e) => setQuery(e.target.value)}
-              data-testid="chat-search-input"
-            />
-            {query && (
-              <button type="button" className="icon-button" aria-label="Clear" onClick={() => setQuery('')}>
-                <X size={12} />
-              </button>
-            )}
-          </div>
-          <div className="chat-search-results">
-            {filtered.slice(0, 10).map((chat) => (
-              <button
-                key={chat.id}
-                type="button"
-                className="search-result"
-                onClick={() => patchUi({ selectedChatId: chat.id })}
-              >
-                <b>{chat.title}</b>
-                <span>{new Date(chat.updatedAt).toLocaleDateString()}</span>
-              </button>
-            ))}
-            {filtered.length === 0 && <div className="faint small">No conversations match “{query}”.</div>}
-          </div>
-        </div>
-      )}
 
       <div className="chat-tabs">
         {chats.map((chat) => (

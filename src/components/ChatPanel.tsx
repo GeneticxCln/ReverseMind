@@ -147,11 +147,6 @@ export function ChatPanel({
             onSend={send}
             onStop={() => runtime.stop(chat.id)}
           />
-          {!workspace && chat.messages.length === 0 && (
-            <div className="composer-foot">
-              <Globe size={10} /> Local-first · no account required
-            </div>
-          )}
         </div>
       </div>
     </div>
