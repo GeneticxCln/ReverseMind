@@ -1,0 +1,32 @@
+appId: ai.reversemind.app
+productName: ReverseMind
+copyright: ReverseMind
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist-electron/**/*
+  - dist-renderer/**/*
+  - python/**/*
+  - resources/**/*
+  - package.json
+extraResources:
+  - from: python
+    to: python
+  - from: resources
+    to: resources
+asarUnpack:
+  - python/**
+linux:
+  syncDesktopName: true
+  target:
+    - AppImage
+  category: Development
+  icon: build/icon.png
+  artifactName: ReverseMind-${version}-${arch}.AppImage
+  desktop:
+    entry:
+      Name: ReverseMind
+      Comment: Local-first agent super app
+      Categories: Development;Utility;
+npmRebuild: false

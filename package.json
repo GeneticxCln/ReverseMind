@@ -1,0 +1,49 @@
+{
+  "name": "reversemind",
+  "version": "0.1.0",
+  "description": "ReverseMind \u2014 local-first agent super app for Linux",
+  "author": "ReverseMind",
+  "license": "MIT",
+  "main": "dist-electron/main.cjs",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:renderer": "vite build",
+    "build:electron": "node scripts/build-electron.mjs",
+    "start": "npm run build && electron .",
+    "package": "npm run build && electron-builder --linux AppImage",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:headed": "npm run build && playwright test --headed",
+    "test:packaged": "npm run package && RM_PACKAGED=release/linux-unpacked/reversemind playwright test e2e/packaged.spec.ts"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^44.11.3",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  },
+  "allowScripts": {
+    "electron@44.11.3": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
+  },
+  "desktopName": "reversemind.desktop"
+}
