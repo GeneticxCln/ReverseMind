@@ -2,7 +2,7 @@
 
 **A local-first agent workspace for Linux.** Coding agents, real terminals, an editor, Git review, an embedded browser, tickets, routines and MCP servers in one Electron app. No account, no hosted gateway, no telemetry.
 
-![ReverseMind: agent chat, editor, terminal and files in one workspace](docs/screenshot.png)
+![ReverseMind: ask the agent, review each proposed action, approve or deny it](docs/screenshot.png)
 
 ## Features
 

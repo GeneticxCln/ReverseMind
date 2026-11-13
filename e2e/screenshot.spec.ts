@@ -1,42 +1,38 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { CHAT_ID, closeHarness, launchApp } from './helpers';
+import { closeHarness, launchApp } from './helpers';
 
 // Regenerates docs/screenshot.png. Run: RM_SCREENSHOT=1 npx playwright test e2e/screenshot.spec.ts
 test.skip(!process.env.RM_SCREENSHOT, 'set RM_SCREENSHOT=1 to regenerate the README screenshot');
 
 test('capture README screenshot', async () => {
   const harness = await launchApp({
-    mode: 'code',
+    mode: 'agent',
     workspaceName: 'my-project',
-    settings: { agentApproval: 'auto' },
+    settings: { agentApproval: 'ask' },
+    autopilot: false,
     prepare: (dir) => {
-      fs.writeFileSync(path.join(dir, 'README.md'), '# my-project\n\nA small demo workspace.\n\n- Ask the agent to change files\n- Approve each action\n- Review the result in Git\n');
+      fs.writeFileSync(path.join(dir, 'README.md'), '# my-project\n');
       fs.writeFileSync(path.join(dir, 'todo.txt'), 'write tests\nship it\n');
     },
-    panes: [
-      { id: 'p-chat', type: 'chat', title: 'ReverseMind', chatId: CHAT_ID },
-      { id: 'p-editor', type: 'editor', title: 'README.md', filePath: 'README.md', tabs: ['README.md'] },
-      { id: 'p-term', type: 'terminal', title: 'Terminal', engine: 'terminal' },
-      { id: 'p-files', type: 'files', title: 'Files' },
-    ],
   });
   const { page, app } = harness;
   try {
-    await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1360, 860));
+    await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1280, 1240));
     const input = page.locator('[data-testid="composer-input"]').first();
-    await input.fill('Create a file named hello.md with content Hello from ReverseMind');
+    const messages = page.locator('[data-testid="chat-messages"]').first();
+
+    await input.fill('What can you do?');
     await input.press('Enter');
-    await expect(page.locator('[data-testid="chat-messages"]').first()).toContainText('All done', { timeout: 15_000 });
-    await input.fill('Run the command echo reverse-mind-ok');
+    await expect(messages).toContainText('local-first coding agent', { timeout: 15_000 });
+
+    await expect(page.locator('[data-testid="composer-send"]')).toHaveAttribute('title', 'Send message'); // reply finished
+    await input.fill('Create a file named CHANGELOG.md with content Initial release');
     await input.press('Enter');
-    await expect(page.locator('[data-testid="chat-messages"]').first()).toContainText('reverse-mind-ok', { timeout: 15_000 });
-    await page.waitForTimeout(1500);
-    await page.getByLabel('Refresh files').click();
-    const host = page.locator('[data-testid="terminal-host"]');
-    await host.click();
-    await page.keyboard.type('ls\n');
+    await expect(page.locator('[data-testid^="approve-"]').first()).toBeVisible({ timeout: 15_000 });
+
+    await input.fill('Then run the command npm test and commit the result');
     await page.waitForTimeout(800);
     await page.screenshot({ path: path.join(process.cwd(), 'docs', 'screenshot.png') });
   } finally {

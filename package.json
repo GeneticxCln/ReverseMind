@@ -17,7 +17,8 @@
     "package": "npm run build && electron-builder --linux AppImage",
     "test:e2e": "npm run build && playwright test",
     "test:e2e:headed": "npm run build && playwright test --headed",
-    "test:packaged": "npm run package && RM_PACKAGED=release/linux-unpacked/reversemind playwright test e2e/packaged.spec.ts"
+    "test:packaged": "npm run package && RM_PACKAGED=release/linux-unpacked/reversemind playwright test e2e/packaged.spec.ts",
+    "postinstall": "node scripts/ensure-electron.mjs"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",

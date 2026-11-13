@@ -21,6 +21,8 @@ export interface LaunchOptions {
   prepare?: (workspacePath: string) => void;
   /** Display name for the seeded workspace (also switches the temp folder prefix). */
   workspaceName?: string;
+  /** Override the seeded agent's autopilot (on by default, which auto-runs a few tools). */
+  autopilot?: boolean;
   task?: boolean;
 }
 
@@ -42,6 +44,7 @@ export async function launchApp(options: LaunchOptions = {}): Promise<Harness> {
 
   const state = createDefaultState();
   const agent = state.agents[0];
+  if (options.autopilot !== undefined) agent.autopilot = options.autopilot;
   const now = Date.now();
   state.settings = {
     ...state.settings,
